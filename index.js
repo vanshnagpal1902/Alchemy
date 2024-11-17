@@ -50,6 +50,7 @@ mongoose.connection.once('open', () => {
     const messageRoutes = require('./routes/messages');
     const requestRoutes = require('./routes/requests');
     const notificationRoutes = require('./routes/notifications');
+    const dashboardRoutes = require('./routes/dashboard');
 
     // Routes
     app.use('/auth', authRoutes);
@@ -59,6 +60,7 @@ mongoose.connection.once('open', () => {
     app.use('/messages', messageRoutes);
     app.use('/requests', requestRoutes);
     app.use('/notifications', notificationRoutes);
+    app.use('/dashboard', dashboardRoutes);
 
     // Root route
     app.get('/', (req, res) => {
@@ -80,4 +82,19 @@ mongoose.connection.once('open', () => {
 mongoose.connection.on('error', (err) => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
+});
+
+// Add this after your routes
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        error: process.env.NODE_ENV === 'production' 
+            ? 'Internal Server Error' 
+            : err.message 
+    });
+});
+
+// Add this for handling 404
+app.use((req, res) => {
+    res.status(404).send('Page not found');
 });

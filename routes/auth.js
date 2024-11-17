@@ -41,20 +41,18 @@ router.post('/login', async (req, res) => {
         req.session.user = {
             id: user._id,
             username: user.username,
-            role: user.role,
-            isAdmin: user.role === 'admin',
-            applications: user.applications || [],
-            fullName: user.fullName,
-            skills: user.skills,
-            interests: user.interests,
-            description: user.description,
-            university: user.university,
+            email: user.email,
             profileCompleted: user.profileCompleted
         };
 
-        await req.session.save();
-
-        res.json({ success: true });
+        // Save session before redirecting
+        req.session.save(err => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Failed to create session' });
+            }
+            res.json({ success: true });
+        });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
